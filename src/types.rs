@@ -14,12 +14,6 @@ pub fn function_type(ret_ty: LLVMTypeRef,
     }
 }
 
-pub fn pointer_type(ty: LLVMTypeRef, address_space: u32) -> LLVMTypeRef {
-    unsafe {
-        llvm::LLVMPointerType(ty, address_space)
-    }
-}
-
 pub trait Type: ContextType /* + GlobalType*/{}
 
 /// Represents a LLVM Context Type
@@ -57,3 +51,51 @@ impl_context_type!(f64, LLVMDoubleTypeInContext);
 //TODO: Structure Types
 //TODO: Sequential Types
 //TODO: Other Types
+
+pub trait LLVMType {
+    fn get_int_type_width(&self) -> u32;
+
+    fn pointer_type(&self, address_space: u32) -> LLVMTypeRef;
+    fn get_undef(&self) -> LLVMValueRef;
+    fn array_type(&self, len: u32) -> LLVMTypeRef;
+    fn struct_set_body(&self,
+                        mut element_types: Vec<LLVMTypeRef>,
+                        packed: bool);
+}
+
+impl LLVMType for LLVMTypeRef {
+    fn get_int_type_width(&self) -> u32 {
+        unsafe {
+            llvm::LLVMGetIntTypeWidth(*self)
+        }
+    }
+
+    fn pointer_type(&self, address_space: u32) -> LLVMTypeRef {
+        unsafe {
+            llvm::LLVMPointerType(*self, address_space)
+        }
+    }
+
+    fn get_undef(&self) -> LLVMValueRef {
+        unsafe {
+            llvm::LLVMGetUndef(*self)
+        }
+    }
+
+    fn array_type(&self, len: u32) -> LLVMTypeRef {
+        unsafe {
+            llvm::LLVMArrayType(*self, len)
+        }
+    }
+
+    fn struct_set_body(&self,
+                           mut element_types: Vec<LLVMTypeRef>,
+                           packed: bool) {
+        unsafe {
+            llvm::LLVMStructSetBody(*self,
+                                    element_types.as_mut_ptr(),
+                                    element_types.len() as u32,
+                                    packed as i32)
+        }
+    }
+}

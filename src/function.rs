@@ -1,6 +1,7 @@
 use llvm_sys::prelude::*;
 use llvm_sys::core as llvm;
 
+#[derive(Copy, Clone)]
 pub struct Function {
     pub ptr: LLVMValueRef,
 }

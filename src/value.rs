@@ -55,3 +55,29 @@ impl_const_value!(INT: i8);
 impl_const_value!(INT: i16);
 impl_const_value!(INT: i32);
 impl_const_value!(INT: i64);
+
+
+pub trait LLVMValue {
+    fn type_of(&self) -> LLVMTypeRef;
+    fn get_type_kind(&self) -> llvm_sys::LLVMTypeKind;
+    fn set_name(&self, name: &str);
+}
+
+impl LLVMValue for LLVMValueRef {
+    fn type_of(&self) -> LLVMTypeRef {
+        unsafe {
+            llvm::LLVMTypeOf(*self)
+        }
+    }
+    fn get_type_kind(&self) -> llvm_sys::LLVMTypeKind {
+        unsafe {
+            llvm::LLVMGetTypeKind(self.type_of())
+        }
+    }
+    fn set_name(&self, name: &str) {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMSetValueName(*self, c_name.as_ptr());
+        }
+    }
+}

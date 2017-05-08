@@ -56,6 +56,33 @@ impl Module {
             }
         }
     }
+
+    pub fn add_alias(&self, ty: LLVMTypeRef,
+                     aliasee: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMAddAlias(self.ptr, ty, aliasee, c_name.as_ptr())
+        }
+    }
+
+    pub fn add_global_const(&self, value: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let g = llvm::LLVMAddGlobal(self.ptr, value.type_of(), c_name.as_ptr());
+            llvm::LLVMSetLinkage(g, llvm_sys::LLVMLinkage::LLVMInternalLinkage);
+            llvm::LLVMSetGlobalConstant(g, true as i32);
+            llvm::LLVMSetInitializer(g, value);
+            g
+        }
+    }
+
+    pub fn add_global(&self, ty: LLVMTypeRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            let g = llvm::LLVMAddGlobal(self.ptr, ty, c_name.as_ptr());
+            g
+        }
+    }
 }
 
 impl fmt::Display for Module {

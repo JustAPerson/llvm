@@ -53,6 +53,37 @@ impl Context {
     pub fn cons<T: IntoConstValue>(&self, val: T) -> LLVMValueRef {
         val.gen_const(self)
     }
+
+    pub fn cons_str(&self, s: &str) -> LLVMValueRef {
+        let c_str = CString::new(s).unwrap();
+        unsafe {
+            llvm::LLVMConstStringInContext(self.ptr,
+                                           c_str.as_ptr(),
+                                           c_str.as_bytes().len() as u32,
+                                           false as i32)
+        }
+    }
+
+    pub fn cons_ty<T: ContextType>(&self) -> LLVMTypeRef {
+        T::get_type_in_context(self)
+    }
+
+    pub fn struct_type(&self,
+                       mut element_types: Vec<LLVMTypeRef>,
+                       packed: bool) -> LLVMTypeRef {
+        unsafe {
+            llvm::LLVMStructTypeInContext(self.ptr,
+                                          element_types.as_mut_ptr(),
+                                          element_types.len() as u32,
+                                          packed as i32)
+        }
+    }
+    pub fn struct_type_named(&self, name: &str) -> LLVMTypeRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMStructCreateNamed(self.ptr, c_name.as_ptr())
+        }
+    }
 }
 
 impl Drop for Context {

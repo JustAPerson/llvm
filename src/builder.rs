@@ -91,11 +91,41 @@ impl Builder {
         }
     }
 
+    pub fn build_neg(&mut self, rhs: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildNeg(self.ptr, rhs, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_not(&mut self, rhs: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildNot(self.ptr, rhs, c_name.as_ptr())
+        }
+    }
+
     pub fn build_icmp(&mut self, op: LLVMIntPredicate, lhs: LLVMValueRef, rhs: LLVMValueRef,
                       name: &str) -> LLVMValueRef {
         let c_name = CString::new(name).unwrap();
         unsafe {
             llvm::LLVMBuildICmp(self.ptr, op, lhs, rhs, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_and(&mut self, lhs: LLVMValueRef,
+                     rhs: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildAnd(self.ptr, lhs, rhs, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_or(&mut self, lhs: LLVMValueRef,
+                     rhs: LLVMValueRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildOr(self.ptr, lhs, rhs, c_name.as_ptr())
         }
     }
 
@@ -129,6 +159,71 @@ impl Builder {
         }
     }
 
+    pub fn build_insert_value(&self, agg: LLVMValueRef, elt: LLVMValueRef, index: u32,
+                              name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildInsertValue(self.ptr, agg, elt, index, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_extract_value(&self, agg: LLVMValueRef, index: u32, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildExtractValue(self.ptr, agg, index, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_unreachable(&self) -> LLVMValueRef {
+        unsafe {
+            llvm::LLVMBuildUnreachable(self.ptr)
+        }
+    }
+
+    pub fn build_gep(&self, pointer: LLVMValueRef,
+                     indices: &[LLVMValueRef],
+                     name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildGEP(self.ptr,
+                               pointer,
+                               indices.as_ptr() as *mut _,
+                               indices.len() as u32,
+                               c_name.as_ptr())
+        }
+    }
+
+    pub fn build_bitcast(&self, value: LLVMValueRef,
+                         ty: LLVMTypeRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildBitCast(self.ptr, value, ty, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_ptr_to_int(&self, value: LLVMValueRef,
+                            ty: LLVMTypeRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildPtrToInt(self.ptr, value, ty, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_sext(&self, value: LLVMValueRef,
+                      ty: LLVMTypeRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildSExt(self.ptr, value, ty, c_name.as_ptr())
+        }
+    }
+
+    pub fn build_zext(&self, value: LLVMValueRef,
+                      ty: LLVMTypeRef, name: &str) -> LLVMValueRef {
+        let c_name = CString::new(name).unwrap();
+        unsafe {
+            llvm::LLVMBuildZExt(self.ptr, value, ty, c_name.as_ptr())
+        }
+    }
 }
 
 impl Drop for Builder {
